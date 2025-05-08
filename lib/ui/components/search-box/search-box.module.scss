@@ -1,91 +1,278 @@
-.host {
-  display: block;
-  width: 100%;
+// search-box.module.scss
+
+/* ============ CORE STYLES ============ */
+.search-root {
+  --yt-search-primary: #ff0000;
+  --yt-search-bg: #ffffff;
+  --yt-search-text: #030303;
+  --yt-search-border: #d3d3d3;
+  --yt-search-hover: #f1f1f1;
+  --yt-search-active: #e5e5e5;
+  --yt-search-placeholder: #606060;
+  --yt-search-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --yt-search-focus-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  --yt-search-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  
+  /* Dark theme variables */
+  &.dark-mode {
+    --yt-search-bg: #282828;
+    --yt-search-text: #f1f1f1;
+    --yt-search-border: #606060;
+    --yt-search-hover: #383838;
+    --yt-search-active: #4d4d4d;
+    --yt-search-placeholder: #aaaaaa;
+  }
 }
 
-.searchboxWrapper {
+/* ============ LAYOUT STRUCTURE ============ */
+.search-container {
+  position: relative;
+  width: 100%;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  z-index: 100;
+
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+  }
+}
+
+.search-wrapper {
   display: flex;
-  //  height: 40px;
-  height: 100%;
-  padding: 2px 6px;
+  height: 48px;
+  width: 100%;
+  position: relative;
+  align-items: center;
+
+  @media (max-width: 480px) {
+    height: 44px;
+  }
 }
 
-.searchboxField {
-  width: 100%;
+/* ============ SEARCH FIELD STYLES ============ */
+.search-field {
+  flex: 1;
   height: 100%;
-  background: var(--yt-searchbox-background);
+  background: var(--yt-search-bg);
+  border: 1px solid var(--yt-search-border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--yt-search-shadow);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-  //  border: 1px solid var(--yt-searchbox-legacy-border-color);
-  &:focus {
-    border: 1px solid #1c62b9;
+  &:focus-within {
+    border-color: var(--yt-search-primary);
+    box-shadow: var(--yt-search-focus-shadow);
   }
 
-  input {
-    width: 100%;
+  /* Material-UI Autocomplete customization */
+  .MuiAutocomplete-root {
     height: 100%;
-    color: var(--yt-searchbox-text-color);
-    margin-left: 4px;
-    border-radius: 2px 0 0 2px;
-    background: transparent;
-    border: none;
-    outline: none;
-  }
+    width: 100%;
 
-  &__option {
-    --mdc-theme-text-primary-on-background: #2c2c54;
-    background-color: #fff;
-    font-size: 1.6rem;
-    height: 3.2rem;
-    line-height: 3.2rem;
-    max-height: 3.2rem;
+    .MuiFormControl-root {
+      height: 100%;
+      margin: 0;
+    }
 
-    ::ng-deep {
-      span {
-        max-height: inherit;
+    .MuiInputBase-root {
+      height: 100%;
+      padding: 0 52px 0 16px !important;
+      color: var(--yt-search-text);
+
+      &::before, &::after {
+        display: none;
+      }
+
+      .MuiInputLabel-root {
+        color: var(--yt-search-placeholder);
+        font-size: 14px;
+        transform: translate(16px, 16px) scale(1);
+        transition: all 0.2s ease;
+
+        &.Mui-focused, &.MuiInputLabel-shrink {
+          color: var(--yt-search-primary);
+          transform: translate(16px, -9px) scale(0.85);
+        }
+      }
+
+      .MuiInputBase-input {
+        font-size: 14px;
+        padding: 0 !important;
+        height: 100%;
+        caret-color: var(--yt-search-primary);
+
+        &::placeholder {
+          color: var(--yt-search-placeholder);
+          opacity: 1;
+        }
       }
     }
+  }
+}
 
-    &:hover {
-      background: #eee !important;
-    }
+/* ============ DROPDOWN SUGGESTIONS ============ */
+.search-suggestions {
+  .MuiAutocomplete-popper {
+    z-index: 1300;
+    margin-top: 4px;
 
-    &.mat-active {
-      background: #eee !important;
+    .MuiAutocomplete-paper {
+      background: var(--yt-search-bg);
+      color: var(--yt-search-text);
+      border-radius: 12px;
+      box-shadow: var(--yt-search-dropdown-shadow);
+      max-height: 60vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--yt-search-primary) transparent;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: var(--yt-search-primary);
+        border-radius: 3px;
+      }
+
+      .MuiAutocomplete-listbox {
+        padding: 8px 0;
+
+        .MuiAutocomplete-option {
+          min-height: 48px;
+          font-size: 14px;
+          padding: 12px 16px;
+          margin: 0 8px;
+          border-radius: 8px;
+          transition: background-color 0.1s ease;
+
+          &:hover {
+            background-color: var(--yt-search-hover);
+          }
+
+          &[aria-selected="true"] {
+            background-color: var(--yt-search-active);
+          }
+
+          .search-suggestion-icon {
+            min-width: 40px;
+            color: var(--yt-search-placeholder);
+          }
+        }
+      }
+
+      .MuiAutocomplete-noOptions {
+        color: var(--yt-search-text);
+        opacity: 0.7;
+        padding: 16px;
+        font-size: 14px;
+        text-align: center;
+      }
     }
   }
 }
 
-.searchboxIcon {
+/* ============ SEARCH ICON ============ */
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  //  height: 100%;
-  color: var(--yt-searchbox-text-color);
-  background: var(--yt-searchbox-legacy-button-color);
-  border-radius: 0 2px 2px 0;
+  color: var(--yt-search-text);
+  background: transparent;
+  border-radius: 50%;
   cursor: pointer;
+  z-index: 2;
+  transition: background-color 0.2s ease;
+
+  &:active {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  @media (max-width: 480px) {
+    width: 36px;
+    height: 36px;
+    right: 8px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
 }
 
-.host {
-  position: relative;
-  width: 100%;
-  
-  .searchboxWrapper {
-    position: relative;
-    
-    .searchboxField {
-      position: relative;
-      
-      // Đảm bảo dropdown hiển thị đúng
-      .MuiAutocomplete-popper {
-        z-index: 9999;
-      }
-      
-      .MuiAutocomplete-paper {
-        max-height: 300px;
-        overflow-y: auto;
+/* ============ LOADING INDICATOR ============ */
+.search-loading {
+  position: absolute;
+  right: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+
+  .MuiCircularProgress-root {
+    color: var(--yt-search-primary);
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  @media (max-width: 480px) {
+    right: 48px;
+  }
+}
+
+/* ============ KEYBOARD NAVIGATION ============ */
+.search-field {
+  .Mui-focused {
+    .MuiInputBase-input {
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover, 
+      &:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--yt-search-text);
+        -webkit-box-shadow: 0 0 0px 1000px var(--yt-search-bg) inset;
+        transition: background-color 5000s ease-in-out 0s;
       }
     }
+  }
+}
+
+/* ============ ACCESSIBILITY ============ */
+.search-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes search-scale-in {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.search-suggestions {
+  .MuiAutocomplete-paper {
+    animation: search-scale-in 0.15s ease-out forwards;
   }
 }
