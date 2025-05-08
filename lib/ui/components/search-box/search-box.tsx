@@ -95,13 +95,13 @@ export default function SearchBox(props: Props) {
                     disableClearable
                     loading={isSearchItemsLoading}
                     filterOptions={(x) => x}
-                    sx={{ 
-                        height: '100%', 
-                        fontSize: '1.4rem',
-                        '& .MuiAutocomplete-inputRoot': {
-                        paddingRight: '40px !important'
-                        }
-                    }}
+                    // sx={{ 
+                    //     height: '100%', 
+                    //     fontSize: '1.4rem',
+                    //     '& .MuiAutocomplete-inputRoot': {
+                    //     paddingRight: '40px !important'
+                    //     }
+                    // }}
                     // Thêm các props sau
                     open={open}
                     onOpen={() => {

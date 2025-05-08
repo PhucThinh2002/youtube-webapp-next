@@ -276,3 +276,28 @@
     animation: search-scale-in 0.15s ease-out forwards;
   }
 }
+
+/* Thêm vào file SCSS */
+
+.searchboxField {
+  .MuiAutocomplete-root {
+    height: 100%;
+    font-size: 1.4rem; /* Kích thước font gốc */
+
+    @media (max-width: 480px) {
+      font-size: 1rem; /* Kích thước mobile */
+    }
+
+    .MuiInputBase-root {
+      padding-right: 40px !important;
+
+      @media (max-width: 480px) {
+        padding-right: 36px !important;
+      }
+    }
+
+    .MuiInputBase-input {
+      font-size: inherit; /* Kế thừa font size */
+    }
+  }
+}
