@@ -6,6 +6,8 @@ import { ytdAbbreviateNumber } from "../../pipes/abbreviate-number/abbreviate-nu
 import { ytdTimeAgo } from "../../pipes/time-ago/time-ago.pipe";
 import classNames from 'classnames';
 import Image from "next/image";
+import { useAppDispatch } from "@/store/hooks";
+import { addVideoToHistoryList } from "@/store/reducers/account.reducer";
 
 interface Props {
     searchItem?: IYoutubeSearchItem;
@@ -26,6 +28,14 @@ export default function VideoThumbnail(props: Props) {
     const isNowPlaying = props.isNowPlaying;
     const duration = props.videoDetail?.contentDetails?.duration;
 
+    const dispatch = useAppDispatch();
+    
+    const handleClick = () => {
+        if (props.searchItem?.id?.videoId) {
+          dispatch(addVideoToHistoryList({ videoId: props.searchItem.id.videoId }))
+        }
+      }
+
     const handleImageError = () => {
         setImageError(true);
     };
@@ -38,7 +48,7 @@ export default function VideoThumbnail(props: Props) {
 
     return (
         <Fragment>
-            <div className={styles.videoThumbnailHost}>
+            <div className={styles.videoThumbnailHost} onClick={handleClick}>
                 <div
                     className={thumbnailClasses}
                 >

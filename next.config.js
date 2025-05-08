@@ -7,6 +7,10 @@ const nextConfig = {
         hostname: 'i.ytimg.com',
       },
     ],
+    domains: [
+      'yt3.ggpht.com',
+      'i.ytimg.com'
+    ],
   },
 }
 
