@@ -1,0 +1,92 @@
+.host {
+    display: block;
+    width: 100%;
+    cursor: default;
+    background: var(--yt-spec-base-background);
+    padding: 16px 0;
+  }
+  
+  .videoOwner {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.6rem;
+  
+    &__avatar {
+      width: 4.8rem;
+      height: 4.8rem;
+      border-radius: 50%;
+      background: var(--yt-spec-10-percent-layer);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--yt-spec-text-secondary);
+      font-weight: bold;
+    }
+  
+    &__title {
+      margin: 0 1.6rem;
+      color: var(--yt-spec-text-primary);
+      font-size: 1.6rem;
+      font-weight: 500;
+    }
+  
+    &__subscribe {
+      margin-left: auto;
+      
+      button {
+        background: var(--yt-spec-brand-button-background) !important;
+        color: #fff !important;
+        font-weight: 500 !important;
+        border-radius: 18px !important;
+        padding: 8px 16px !important;
+        text-transform: none !important;
+        
+        &:hover {
+          background: var(--yt-spec-brand-button-hover-background) !important;
+        }
+      }
+    }
+  }
+  
+  .ytExpander {
+    margin-left: 6.4rem;
+  
+    &__content {
+      height: 75px;
+      overflow: hidden;
+      color: var(--yt-spec-text-primary);
+      white-space: pre-line;
+      line-height: 1.6;
+      font-size: 1.4rem;
+  
+      &--expanded {
+        height: auto;
+      }
+  
+      a {
+        color: var(--yt-spec-call-to-action);
+        text-decoration: none;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  
+    &__more {
+      background: transparent !important;
+      border: 0 !important;
+      color: var(--yt-spec-text-secondary) !important;
+      cursor: pointer !important;
+      font-size: 1.3rem !important;
+      font-weight: 500 !important;
+      padding: 8px 0 !important;
+      margin-top: 8px !important;
+      text-transform: uppercase !important;
+      min-width: auto !important;
+      
+      &:hover {
+        background: transparent !important;
+      }
+    }
+  }
