@@ -10,6 +10,7 @@ import VideoThumbnailLoader from "@/lib/ui/components/video-thumbnail-loader/vid
 import { Button } from "@mui/material";
 import VideoThumbnail from "@/lib/ui/components/video-thumbnail/video-thumbnail";
 import Link from "next/link";
+import { useVideoList } from "@/lib/ui/hooks/useVideoList";
 
 export default function HistoryPage() {
     const isWatchHistoryEnabled = useAppSelector(selectIsWatchHistoryEnabled);
@@ -19,7 +20,7 @@ export default function HistoryPage() {
 
     const [isLoading, setisLoading] = useState<boolean>(false);
     const [watchedVideos, setWatchedVideos] = useState<IYoutubeSearchItem[]>([]);
-    const { fetchSeachItems } = useSearchList();
+    const { fetchVideoItems } = useVideoList();
 
 
     const onClearWatchHistory = () => {
@@ -30,33 +31,26 @@ export default function HistoryPage() {
         dispatch(toggleIsWatchHistoryEnabled(enable))
     }
 
-    const getWatchedVideos = useCallback((videoIds: string[] | undefined): void => {
-        setWatchedVideos([]);
-        setisLoading(true);
-        if (!videoIds?.length) {
-            setisLoading(false);
-            return;
-        }
+    const getWatchedVideos = useCallback(async (videoIds: string[] | undefined) => {
+  setWatchedVideos([]);
+  setisLoading(true);
+  
+  if (!videoIds?.length) {
+    setisLoading(false);
+    return;
+  }
 
-        const reqArray: Observable<IYoutubeSearchItem>[] = [];
-        videoIds?.forEach((id: string) => {
-            const videoRequest = from(fetchSeachItems({ query: id })).pipe(
-                map((data) => data?.[0]),
-                filter(Boolean)
-            );
-            reqArray.push(videoRequest);
-        });
-
-        forkJoin(reqArray)
-            .pipe(
-                finalize(() => {
-                    setisLoading(false);
-                })
-            )
-            .subscribe((data: IYoutubeSearchItem[]) => {
-                setWatchedVideos(data);
-            });
-    }, [fetchSeachItems])
+  try {
+    // Sửa ở đây - thêm await và type casting
+    const response = await fetchVideoItems({ id: videoIds.join(',') }) as IYoutubeSearchItem[];
+    setWatchedVideos(response);
+  } catch (error) {
+    console.error('Failed to fetch watched videos:', error);
+    setWatchedVideos([]);
+  } finally {
+    setisLoading(false);
+  }
+}, [fetchVideoItems]);
 
     useEffect(() => {
         getWatchedVideos(watchedVideoIds);

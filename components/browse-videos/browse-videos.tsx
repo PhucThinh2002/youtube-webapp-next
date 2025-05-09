@@ -12,12 +12,15 @@ import BrowseVideosEmpty from './browse-videos-empty/browse-videos-empty';
 import BrowseVideosError from './browse-videos-error/browse-videos-error';
 import Link from 'next/link';
 import { debounce } from 'lodash';
+import { IYoutubeSearchItem } from '@/lib/ui/models/youtube-search-list.model';
 
 export default function BrowserVideos() {
     const [videoIds, setVideoIds] = useState<string | undefined>();
     const [lastSearchQuery, setLastSearchQuery] = useState<string>('');
     const searchQuery = useAppSelector(selectSearchQuery);
-    
+    const searchCache = useRef<Map<string, IYoutubeSearchItem[]>>(new Map());
+    const [localSearchItems, setLocalSearchItems] = useState<IYoutubeSearchItem[] | null>(null);
+
     const { 
         fetchSeachItems, 
         searchItems, 
@@ -34,13 +37,20 @@ export default function BrowserVideos() {
 
     // Sử dụng useRef cho debounce function để tránh recreate mỗi lần render
     const debouncedSearchRef = useRef(
-        debounce((query: string) => {
-            if (query.trim() && query !== lastSearchQuery) {
-                setLastSearchQuery(query);
-                fetchSeachItems({ query });
+    debounce((query: string) => {
+        if (query.trim() && query !== lastSearchQuery) {
+            if (searchCache.current.has(query)) {
+                setLocalSearchItems(searchCache.current.get(query)!); // Sử dụng setLocalSearchItems
+                return;
             }
-        }, 500)
-    );
+            setLastSearchQuery(query);
+            fetchSeachItems({ query }).then(data => {
+                searchCache.current.set(query, data);
+                setLocalSearchItems(data); // Sử dụng setLocalSearchItems
+            });
+        }
+    }, 600)
+);
 
     // Tối ưu: Memoize video details để tránh tính toán lại
     const videoDetailsMap = useMemo(() => {

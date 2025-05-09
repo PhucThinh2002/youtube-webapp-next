@@ -9,29 +9,25 @@ import { useSearchList } from "@/lib/ui/hooks/useSearchList";
 import VideoThumbnailLoader from "@/lib/ui/components/video-thumbnail-loader/video-thumbnail-loader";
 import { Search } from "@mui/icons-material";
 import Link from "next/link";
+import { useVideoList } from "@/lib/ui/hooks/useVideoList";
 
 export default function Likes() {
     const videoIds = useAppSelector(selectLikedVideos);
     const { fetchSeachItems } = useSearchList();
 
     const [likedVideos, setLikedVideos] = useState<IYoutubeSearchItem[]>([]);
+    const { fetchVideoItems } = useVideoList();
 
-    const getLikedVideosInfo = useCallback((videoIds: string[]): void => {
-        const reqArray: Observable<IYoutubeSearchItem>[] = [];
-        videoIds?.forEach((id: string) => {
-            const videoRequest = from(fetchSeachItems({ query: id })).pipe(
-                map((data) => data?.[0]),
-                filter(Boolean)
-            );
-            reqArray.push(videoRequest);
-        });
-
-        forkJoin(reqArray)
-            .pipe(catchError(() => EMPTY))
-            .subscribe((data: IYoutubeSearchItem[]) => {
-                setLikedVideos(data);
-            });
-    }, [fetchSeachItems])
+    const getLikedVideosInfo = useCallback(async (videoIds: string[]) => {
+    if (!videoIds.length) return;
+    
+    try {
+        const response = await fetchVideoItems({ id: videoIds.join(',') });
+        setLikedVideos(response);
+    } catch (error) {
+        console.error('Failed to fetch liked videos:', error);
+    }
+    }, [fetchVideoItems]);
 
     useEffect(() => {
         getLikedVideosInfo(videoIds);

@@ -54,31 +54,26 @@ export default function SearchBox(props: Props) {
     }, []);
 
     useEffect(() => {
-        const sub = optionSelected$.current
-          .pipe(
-            debounceTime(debouncePeriod),
-            distinctUntilChanged(),
-            filter(val => val.length >= minChars),
-            switchMap((val) => {
-              if (!val.trim()) return of([]);
-              return from(fetchSeachItems({ query: val })).pipe(
-                catchError(() => of([]))
-              );
-            })
-          )
-          .subscribe({
-            next: (data: IYoutubeSearchItem[]) => {
-            //   console.log('Fetched data:', data);
-              setOptions(data);
-            },
-            error: (err) => {
-              console.error('Search error:', err);
-              setOptions([]);
-            }
-          });
-    
-        return () => sub?.unsubscribe();
-      }, [fetchSeachItems, debouncePeriod, minChars]);
+  const sub = optionSelected$.current
+    .pipe(
+      debounceTime(800), // Tăng từ 500 lên 800ms
+      distinctUntilChanged(),
+      filter(val => val.length >= minChars && val !== inputValue),
+      switchMap((val) => {
+        if (!val.trim()) return of([]);
+        return from(fetchSeachItems({ query: val })).pipe(
+          catchError(() => of([]))
+        );
+      })
+    )
+    .subscribe({
+      next: (data: IYoutubeSearchItem[]) => {
+        setOptions(data);
+      }
+    });
+
+  return () => sub.unsubscribe();
+}, [fetchSeachItems, minChars, inputValue]);
 
     useEffect(() => {
         optionSelected$.current.next(inputValue);

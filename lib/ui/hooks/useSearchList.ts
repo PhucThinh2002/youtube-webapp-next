@@ -11,7 +11,7 @@ export const useSearchList = (minChars: number = 3) => {
   const [lastQuery, setLastQuery] = useState<string | null>(null);
 
   const fetchSeachItems = useCallback(async (params: IYoutubeSearchParams): Promise<IYoutubeSearchItem[]> => {
-    const { query, maxResults = 12 } = params;
+    const { query, maxResults = 5 } = params;
     
     if (!query || query.length < minChars) return []; // Thêm điều kiện kiểm tra độ dài
     
@@ -42,8 +42,7 @@ export const useSearchList = (minChars: number = 3) => {
     }
   }, [minChars]);
 
-  // Trong useSearchList.ts
-const fetchVideosByIds = useCallback(async (ids: string[]): Promise<IYoutubeSearchItem[]> => {
+  const fetchVideosByIds = useCallback(async (ids: string[]): Promise<IYoutubeSearchItem[]> => {
   if (!ids.length) return [];
   
   setIsLoading(true);
@@ -52,7 +51,7 @@ const fetchVideosByIds = useCallback(async (ids: string[]): Promise<IYoutubeSear
   try {
     const response = await axios.get(`${API_BASE_URL}/videos`, {
       params: {
-        part: 'snippet,contentDetails',
+        part: 'snippet,contentDetails,statistics',
         id: ids.join(','),
         maxResults: ids.length,
         key: API_KEY
@@ -60,7 +59,9 @@ const fetchVideosByIds = useCallback(async (ids: string[]): Promise<IYoutubeSear
     });
     return response.data.items || [];
   } catch (error) {
-    console.error('Fetch videos error:', error);
+    if (axios.isAxiosError(error)) {
+      setError(error);
+    }
     return [];
   } finally {
     setIsLoading(false);
