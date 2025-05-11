@@ -8,7 +8,7 @@ import { persistStore } from 'redux-persist';
 import DarkThemeProvider from '@/providers/dark-theme-provider/dark-theme-provider';
 import MiniPlayerWrapper from '@/components/mini-player-wrapper/mini-player-wrapper';
 import { StyledEngineProvider } from '@mui/material/styles';
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [persistor, setPersistor] = useState<any>(null);

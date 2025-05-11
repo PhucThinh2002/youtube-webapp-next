@@ -1,153 +1,153 @@
-import styles from './search-box.module.scss';
+import styles from "./search-box.module.scss";
 import { Search } from "@mui/icons-material";
 import TextField from "@mui/material/TextField";
-import Autocomplete from '@mui/material/Autocomplete';
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useSearchList } from '../../hooks/useSearchList';
-import { Subject, from, of } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs/operators';
-import { IYoutubeSearchItem } from '../../models/youtube-search-list.model';
-import { CircularProgress } from '@mui/material';
+import Autocomplete from "@mui/material/Autocomplete";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useSearchList } from "../../hooks/useSearchList";
+import { Subject, from, of } from "rxjs";
+import { catchError, debounceTime, distinctUntilChanged, switchMap } from "rxjs/operators";
+import { IYoutubeSearchItem } from "../../models/youtube-search-list.model";
+import { CircularProgress } from "@mui/material";
 
 interface Props {
-    debouncePeriod?: number;
-    placeholder?: string;
-    minChars?: number;
-    inputChangeHandler: (value: IYoutubeSearchItem | string) => void;
+  placeholder?: string;
+  minChars?: number;
+  onSearch: (value: string) => void;
 }
 
 export default function SearchBox(props: Props) {
-    const { 
-        placeholder, 
-        debouncePeriod = 500,
-        minChars = 3,
-        inputChangeHandler 
-    } = props;
-    
-    const [inputValue, setInputValue] = useState<string>('');
-    const [options, setOptions] = useState<IYoutubeSearchItem[]>([]);
-    const { fetchSeachItems, isSearchItemsLoading } = useSearchList(); // Fixed typo here
-    const optionSelected$ = useRef(new Subject<string>());
-    const [open, setOpen] = useState(false);
+  const { placeholder, minChars = 3, onSearch } = props;
 
-    const getOptionLabel = useCallback((option: IYoutubeSearchItem | string): string => {
-        if (typeof option === 'string') return option;
-        const title = option.snippet?.title;
-        // console.log('Label:', title); // 👈 Xem log ở đây
-        return title || 'Không có tiêu đề';
-    }, []);    
+  const [inputValue, setInputValue] = useState<string>("");
+  const [options, setOptions] = useState<IYoutubeSearchItem[]>([]);
+  const { fetchSeachItems, isSearchItemsLoading } = useSearchList();
+  const optionSelected$ = useRef(new Subject<string>());
+  const [open, setOpen] = useState(false);
 
-    // Hàm xử lý khi chọn kết quả
-    const handleSelection = useCallback((value: IYoutubeSearchItem | string) => {
-        inputChangeHandler(value);
-        setOpen(false); // Chỉ đóng dropdown
-        // KHÔNG tự động cập nhật inputValue ở đây
-    }, [inputChangeHandler]);
-
-
-    // Hàm xử lý nhấn phím Enter
-    const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-        if (event.key === 'Enter') {
-            setOpen(false); // Chỉ đóng dropdown khi nhấn Enter
-            // KHÔNG tự động chọn item nào
-        }
-    }, []);
-
-    useEffect(() => {
-  const sub = optionSelected$.current
-    .pipe(
-      debounceTime(800), // Tăng từ 500 lên 800ms
-      distinctUntilChanged(),
-      filter(val => val.length >= minChars && val !== inputValue),
-      switchMap((val) => {
-        if (!val.trim()) return of([]);
-        return from(fetchSeachItems({ query: val })).pipe(
-          catchError(() => of([]))
-        );
-      })
-    )
-    .subscribe({
-      next: (data: IYoutubeSearchItem[]) => {
-        setOptions(data);
+  // Xử lý search khi nhấn Enter
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === "Enter" && inputValue.trim().length >= minChars) {
+        onSearch(inputValue);
+        setOpen(false);
       }
-    });
+    },
+    [inputValue, minChars, onSearch]
+  );
 
-  return () => sub.unsubscribe();
-}, [fetchSeachItems, minChars, inputValue]);
+  // Xử lý search khi chọn từ dropdown
+  const handleChange = useCallback(
+    (event: any, value: IYoutubeSearchItem | string | null) => {
+      if (!value) return;
 
-    useEffect(() => {
-        optionSelected$.current.next(inputValue);
-    }, [inputValue]);
+      if (typeof value === "string") {
+        onSearch(value);
+      } else {
+        onSearch(value.snippet?.title || "");
+      }
+      setOpen(false);
+    },
+    [onSearch]
+  );
 
-    return (
-        <div className={styles.host}>
-            <div className={styles.searchboxWrapper}>
-                <div className={styles.searchboxField}>
-                <Autocomplete
-                    freeSolo
-                    options={options}
-                    getOptionLabel={getOptionLabel}
-                    disableClearable
-                    loading={isSearchItemsLoading}
-                    filterOptions={(x) => x}
-                    // sx={{ 
-                    //     height: '100%', 
-                    //     fontSize: '1.4rem',
-                    //     '& .MuiAutocomplete-inputRoot': {
-                    //     paddingRight: '40px !important'
-                    //     }
-                    // }}
-                    // Thêm các props sau
-                    open={open}
-                    onOpen={() => {
-                        setOpen(inputValue.length >= minChars)
-                    }}
-                    onClose={() => setOpen(false)} // Xử lý khi đóng dropdown
-                    noOptionsText={inputValue.length >= minChars ? "Không tìm thấy kết quả" : `Nhập ít nhất ${minChars} ký tự`}
-                    renderOption={(props, option) => {
-                        if (typeof option === 'string') {
-                            return <li {...props} key={option}>{option}</li>;
-                        }
-                        return (
-                            <li {...props} key={option.id?.videoId || option.snippet?.title}>
-                                {getOptionLabel(option)}
-                            </li>
-                        );
-                    }}
-                    onChange={(event: any, newValue: IYoutubeSearchItem | string) => {
-                        if (newValue) {
-                            handleSelection(newValue);
-                        }
-                    }}
-                    onInputChange={(event, newInputValue) => {
-                        setInputValue(newInputValue);
-                        // Tự động mở dropdown khi đủ ký tự
-                        setOpen(newInputValue.length >= minChars);
-                    }}
-                    renderInput={(params) => (
-                        <TextField 
-                            {...params} 
-                            label={placeholder}
-                            onKeyDown={handleKeyDown} // Thêm xử lý nhấn phím
-                            InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <>
-                                        {isSearchItemsLoading ? (
-                                            <CircularProgress color="inherit" size={20} />
-                                        ) : null}
-                                        {params.InputProps.endAdornment}
-                                        <div className={styles.searchboxIcon}>
-                                            <Search />
-                                        </div>
-                                    </>
-                                )
-                            }}
-                        />
-                    )}
-                    />
-                </div>
-            </div>
+  // Xử lý search khi nhập liệu
+  useEffect(() => {
+    const sub = optionSelected$.current
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((val) => {
+          if (!val.trim() || val.length < minChars) {
+            setOptions([]);
+            return of([]);
+          }
+
+          return from(fetchSeachItems({ query: val })).pipe(
+            catchError((err) => {
+              console.error("Search error:", err);
+              return of([]);
+            })
+          );
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          // Ensure data is always an array
+          const safeData = Array.isArray(data) ? data : [];
+          setOptions(safeData);
+          setOpen(safeData.length > 0 && inputValue.length >= minChars);
+        },
+      });
+
+    return () => sub.unsubscribe();
+  }, [fetchSeachItems, minChars, inputValue]);
+
+  // Cập nhật search term khi input thay đổi
+  useEffect(() => {
+    optionSelected$.current.next(inputValue);
+  }, [inputValue]);
+
+  return (
+    <div className={styles.host}>
+      <div className={styles.searchboxWrapper}>
+        <div className={styles.searchboxField}>
+          <Autocomplete
+            fullWidth
+            disablePortal
+            sx={{
+              width: "100%",
+              maxWidth: "100%",
+              "& .MuiInputBase-root": {
+                padding: "0 !important",
+              },
+            }}
+            freeSolo
+            options={options}
+            getOptionLabel={(option) => {
+              if (typeof option === "string") return option;
+              return option.snippet?.title || "";
+            }}
+            inputValue={inputValue}
+            onInputChange={(_, newValue) => setInputValue(newValue)}
+            onChange={handleChange}
+            disableClearable
+            loading={isSearchItemsLoading}
+            filterOptions={(x) => x}
+            open={open}
+            onOpen={() =>
+              setOpen(inputValue.length >= minChars && options.length > 0)
+            }
+            onClose={() => setOpen(false)}
+            noOptionsText={
+              inputValue.length >= minChars
+                ? isSearchItemsLoading
+                  ? "Đang tìm kiếm..."
+                  : "Không tìm thấy kết quả"
+                : `Nhập ít nhất ${minChars} ký tự`
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={placeholder}
+                onKeyDown={handleKeyDown}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {isSearchItemsLoading ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null}
+                      <div className={styles.searchboxIcon}>
+                        <Search />
+                      </div>
+                    </>
+                  ),
+                }}
+              />
+            )}
+          />
         </div>
-    );
+      </div>
+    </div>
+  );
 }

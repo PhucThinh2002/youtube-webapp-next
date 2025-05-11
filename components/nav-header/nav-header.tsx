@@ -103,19 +103,19 @@ export default function NavHeader() {
                     </div>
 
                     <div className={styles.header__center}>
-                        <SearchBox inputChangeHandler={inputChangeHandler} />
+                        <SearchBox onSearch={(value) => inputChangeHandler(value)} />
                     </div>
 
                     <div className={styles.header__end}>
                         <div className={`${styles.headerFeature} ${styles[`headerFeature--community`]}`}>
-                            <IconButton
+                            {/* <IconButton
                                 className={styles.headerNavIcon__btn}
                                 onClick={handleFeatureMenuClick}
                             >
                                 <GridView />
-                            </IconButton>
+                            </IconButton> */}
 
-                            <Popover
+                            {/* <Popover
                                 open={isFeatureMenuOpen}
                                 anchorEl={featureAnchorEl}
                                 onClose={handleFeatureMenuClose}
@@ -160,7 +160,7 @@ export default function NavHeader() {
                                         })}
                                     </div>
                                 </div>
-                            </Popover>
+                            </Popover> */}
 
                         </div>
 

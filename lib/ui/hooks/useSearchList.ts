@@ -8,39 +8,47 @@ export const useSearchList = (minChars: number = 3) => {
   const [data, setData] = useState<IYoutubeSearchItem[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<AxiosError | null>(null);
-  const [lastQuery, setLastQuery] = useState<string | null>(null);
 
-  const fetchSeachItems = useCallback(async (params: IYoutubeSearchParams): Promise<IYoutubeSearchItem[]> => {
-    const { query, maxResults = 5 } = params;
-    
-    if (!query || query.length < minChars) return []; // Thêm điều kiện kiểm tra độ dài
-    
-    setIsLoading(true);
-    setError(null);
-    setLastQuery(query);
+ // Thêm log để kiểm tra API response
+const fetchSeachItems = useCallback(async (params: IYoutubeSearchParams): Promise<IYoutubeSearchItem[]> => {
+  console.log('API call with query:', params.query); // Xem query gọi API
+  const { query, maxResults = 5 } = params;
   
-    try {
-      const response = await axios.get(`${API_BASE_URL}/search`, {
-        params: {
-          part: 'snippet',
-          q: query,
-          maxResults,
-          key: API_KEY,
-          type: 'video'
-        }
-      });
-      const items = response.data.items || [];
-      setData(items);
-      return items;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(error);
+  if (!query) {
+    console.log('Empty query, returning empty array');
+    return [];
+  }
+  
+  console.log('Making API request for:', query);
+  
+  try {
+    const response = await axios.get(`${API_BASE_URL}/search`, {
+      params: {
+        part: 'snippet',
+        q: query,
+        maxResults,
+        key: API_KEY,
+        type: 'video'
       }
-      return [];
-    } finally {
-      setIsLoading(false);
+    });
+    
+    console.log('API response:', {
+      status: response.status,
+      data: response.data,
+      itemsCount: response.data.items?.length || 0
+    });
+    
+    const items = response.data.items || [];
+    setData(items);
+    return items;
+  } catch (error) {
+    console.error('Search API error:', error); // Thêm log
+    if (axios.isAxiosError(error)) {
+      setError(error);
     }
-  }, [minChars]);
+    return [];
+  }
+}, []);
 
   const fetchVideosByIds = useCallback(async (ids: string[]): Promise<IYoutubeSearchItem[]> => {
   if (!ids.length) return [];

@@ -12,7 +12,7 @@
   --yt-search-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   --yt-search-focus-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
   --yt-search-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  
+
   /* Dark theme variables */
   &.dark-mode {
     --yt-search-bg: #282828;
@@ -80,7 +80,8 @@
       padding: 0 52px 0 16px !important;
       color: var(--yt-search-text);
 
-      &::before, &::after {
+      &::before,
+      &::after {
         display: none;
       }
 
@@ -90,7 +91,8 @@
         transform: translate(16px, 16px) scale(1);
         transition: all 0.2s ease;
 
-        &.Mui-focused, &.MuiInputLabel-shrink {
+        &.Mui-focused,
+        &.MuiInputLabel-shrink {
           color: var(--yt-search-primary);
           transform: translate(16px, -9px) scale(0.85);
         }
@@ -236,7 +238,7 @@
   .Mui-focused {
     .MuiInputBase-input {
       &:-webkit-autofill,
-      &:-webkit-autofill:hover, 
+      &:-webkit-autofill:hover,
       &:-webkit-autofill:focus {
         -webkit-text-fill-color: var(--yt-search-text);
         -webkit-box-shadow: 0 0 0px 1000px var(--yt-search-bg) inset;
@@ -301,3 +303,89 @@
     }
   }
 }
+
+/* ============ SEARCH ICON FIX ============ */
+.searchboxField {
+  position: relative; // Quan trọng: tạo context positioning
+
+  .MuiAutocomplete-root {
+    .MuiInputBase-root {
+      padding-right: 40px !important; // Giảm khoảng cách bên phải
+    }
+  }
+
+  ~ .search-icon {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    pointer-events: none; // Cho phép click xuyên qua icon
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+/* ============ GALAXY Z FOLD 5 & NARROW SCREENS FIXES ============ */
+@media (max-width: 400px) {
+  .host {
+    padding: 4px 4px !important;
+  }
+
+  .searchboxWrapper {
+    padding: 4px 0; /* Giảm khoảng trắng trên dưới */
+    display: flex;
+    align-items: center; /* Căn giữa theo chiều dọc */
+  }
+
+  .searchboxField {
+    flex: 1;
+    min-width: 0; /* Quan trọng: ngăn flex item tràn ra ngoài */
+
+    .MuiAutocomplete-root {
+      .MuiInputBase-root {
+        padding: 8px 12px !important; /* Điều chỉnh padding bên trong */
+        height: 40px; /* Chiều cao cố định */
+      }
+    }
+  }
+
+  .searchboxIcon {
+    margin-left: 8px; /* Khoảng cách với ô input */
+    flex-shrink: 0; /* Ngăn không bị co nhỏ */
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  @media (max-width: 350px) {
+    .searchboxWrapper {
+      padding: 2px 0;
+    }
+
+    .searchboxField {
+      .MuiAutocomplete-root {
+        .MuiInputBase-root {
+          padding: 6px 8px !important;
+          height: 36px;
+        }
+      }
+    }
+
+    .searchboxIcon {
+      margin-left: 6px;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+

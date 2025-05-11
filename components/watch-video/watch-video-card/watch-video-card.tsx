@@ -1,10 +1,10 @@
 import { IYoutubeVideoItem } from "@/lib/ui/models/youtube-video-list.model";
 import { Fragment, useEffect, useState } from "react";
-import styles from './watch-video-card.module.scss';
+import styles from "./watch-video-card.module.scss";
 import { PictureInPictureAlt, Share, ThumbDown } from "@mui/icons-material";
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt';
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import ThumbDownOffAltIcon from "@mui/icons-material/ThumbDownOffAlt";
 import { ytdAbbreviateNumber } from "@/lib/ui/pipes/abbreviate-number/abbreviate-number.pipe";
 import { Button, Divider } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -18,186 +18,239 @@ import { useRouter } from "next/router";
 import { useVideoList } from "@/lib/ui/hooks/useVideoList";
 
 interface Props {
-    videoId: string | undefined;
-    startSeconds?: number | undefined;
-    videoResult: IYoutubeVideoItem | undefined;
+  videoId: string | undefined;
+  startSeconds?: number | undefined;
+  videoResult: IYoutubeVideoItem | undefined;
 }
 export default function WatchVideoCard(props: Props) {
-    const router = useRouter();
-    const dispatch = useAppDispatch();
-    const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
-    const [videoUrl, setVideoUrl] = useState<string>('');
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState<boolean>(false);
+  const [videoUrl, setVideoUrl] = useState<string>("");
 
-    const { videoId, startSeconds} = props;
-    const { fetchVideoItems, videoItems, isVideoItemsLoading, videoItemsError } = useVideoList();
-    const likedVideos = useAppSelector(selectLikedVideos);
-    const dislikedVideos = useAppSelector(selectDislikedVideos);
-    const buttonStyles = {
-        color: 'var(--yt-spec-text-primary)'
-    };
+  const { videoId, startSeconds, videoResult: propVideoResult } = props;
+  const [localVideoResult, setLocalVideoResult] = useState<
+    IYoutubeVideoItem | undefined
+  >(propVideoResult);
+  const { fetchVideoItems, videoItems, isVideoItemsLoading, videoItemsError } =
+    useVideoList();
+  const likedVideos = useAppSelector(selectLikedVideos);
+  const dislikedVideos = useAppSelector(selectDislikedVideos);
+  const buttonStyles = {
+    color: "var(--yt-spec-text-primary)",
+  };
 
-    useEffect(() => {
-        if (videoId) {
-          fetchVideoItems({ id: videoId });
+  useEffect(() => {
+    if (!localVideoResult && videoId) {
+      fetchVideoItems({ id: videoId }).then((items) => {
+        if (items && items.length > 0) {
+          setLocalVideoResult(items[0]);
         }
-    }, [videoId, fetchVideoItems]);
-
-    useEffect(() => {
-        if (!videoId) return;
-        const url = `${location.host}/watch?v=${videoId}`;
-        setVideoUrl(url);
-    }, [videoId]);
-
-    const videoResult = videoItems?.[0];
-
-    const isLiked = (): boolean => {
-        if (!videoId) { return false; }
-        return likedVideos?.includes(videoId);
+      });
     }
+  }, [videoId, localVideoResult, fetchVideoItems]);
 
-    const isDisliked = (): boolean => {
-        if (!videoId) { return false; }
-        return dislikedVideos?.includes(videoId);
+  useEffect(() => {
+    if (!videoId) return;
+    const url = `${location.host}/watch?v=${videoId}`;
+    setVideoUrl(url);
+  }, [videoId]);
+
+  const videoResult = localVideoResult;
+
+  const isLiked = (): boolean => {
+    if (!videoId) {
+      return false;
     }
+    return likedVideos?.includes(videoId);
+  };
 
-    const onToggleLike = (): void => {
-        dispatch(toggleLikeVideo({ videoId }))
+  const isDisliked = (): boolean => {
+    if (!videoId) {
+      return false;
     }
+    return dislikedVideos?.includes(videoId);
+  };
 
-    const onToggleDisLike = (): void => {
-        dispatch(toggleDislikeVideo({ videoId }))
-    }
+  const onToggleLike = (): void => {
+    dispatch(toggleLikeVideo({ videoId }));
+  };
 
-    const onMiniPLayerMode = (): void => {
-        dispatch(setMiniPlayerVideo({ videoId: videoId, startSeconds: 0}));
-        dispatch(setIsMiniPlayerMode(true));
+  const onToggleDisLike = (): void => {
+    dispatch(toggleDislikeVideo({ videoId }));
+  };
 
-        router.push({
-            pathname: '/'
-        });
-    }
+  const onMiniPLayerMode = (): void => {
+    dispatch(setMiniPlayerVideo({ videoId: videoId, startSeconds: 0 }));
+    dispatch(setIsMiniPlayerMode(true));
 
-    if (isVideoItemsLoading) {
-        return (
-        <div className={styles.videoCardLoader}>
-            <VideoThumbnailLoader direction="horizontal" />
-        </div>
-        );
-    }
+    router.push({
+      pathname: "/",
+    });
+  };
 
-    if (videoItemsError) {
-        return <div className={styles.errorContainer}>Error loading video: {videoItemsError.message}</div>;
-    }
-
-    if (!videoResult) {
-        return <div className={styles.emptyContainer}>No video data available</div>;
-    }
-
-        if (!videoResult?.snippet?.title) {
-            return (
-                <div className={styles.videoCardLoader}>
-                    <VideoThumbnailLoader direction="horizontal" />
-                </div>
-            );
-        }
-
-
+  if (isVideoItemsLoading) {
     return (
-        <Fragment>
-            <div className={styles.videoCard}>
-                <div className={styles.videoCard__player}>
-                    <VideoPlayer videoId={videoId} startSeconds={startSeconds} />
-                </div>
+      <div className={styles.videoCardLoader}>
+        <VideoThumbnailLoader direction="horizontal" />
+      </div>
+    );
+  }
 
-                <div className={styles.videoDetails}>
-                    {
-                        videoResult?.snippet?.tags?.length ?
-                            <div className={styles.videoDetailsTags}>
-                                {videoResult.snippet.tags?.slice(0, 3).map((tag, tagIndex) => {
-                                    return (
-                                        <div className={`${styles.videoDetailsTag} mat-subtitle-2`} key={tagIndex}>
-                                            #{tag}
-                                        </div>
-                                    );
-                                })}
-                            </div> : null
+  if (videoItemsError) {
+    return (
+      <div className={styles.errorContainer}>
+        Error loading video: {videoItemsError.message}
+      </div>
+    );
+  }
 
-                    }
+  if (!videoResult) {
+    return <div className={styles.emptyContainer}>No video data available</div>;
+  }
 
-                    <div className={`${styles.videoDetails__title} mat-h2`}>{videoResult?.snippet?.title}</div>
+  if (!videoResult?.snippet?.title) {
+    return (
+      <div className={styles.videoCardLoader}>
+        <VideoThumbnailLoader direction="horizontal" />
+      </div>
+    );
+  }
 
-                    <div className={styles.videoDetails__footer}>
-                        <div className={`${styles.videoDetails__footer__views} mat-h3`}>
-                            <span> {videoResult?.statistics?.viewCount} views </span>
-                            <span> • {videoResult?.snippet?.publishedAt?.toString()} </span>
-                        </div>
+  return (
+    <Fragment>
+      <div className={styles.videoCard}>
+        <div className={styles.videoCard__player}>
+          <VideoPlayer videoId={videoId} startSeconds={startSeconds} />
+        </div>
 
-                        <div className={styles.videoDetailsActions}>
-                            <Button sx={buttonStyles} className={styles.videoDetailsActions__item} onClick={onToggleLike}>
-                                {isLiked() && <ThumbUpIcon className={styles.videoDetailsActions__item__icon} />}
-                                {!isLiked() && <ThumbUpOffAltIcon className={styles.videoDetailsActions__item__icon} />}
+        <div className={styles.videoDetails}>
+          {videoResult?.snippet?.tags?.length ? (
+            <div className={styles.videoDetailsTags}>
+              {videoResult.snippet.tags?.slice(0, 3).map((tag, tagIndex) => {
+                return (
+                  <div
+                    className={`${styles.videoDetailsTag} mat-subtitle-2`}
+                    key={tagIndex}
+                  >
+                    #{tag}
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
 
-                                <p className={`${styles.videoDetailsActions__item__text} mat-h3`}
-                                >
-                                    {ytdAbbreviateNumber(Number(videoResult?.statistics?.likeCount), 0)} LIKES
-                                </p>
+          <div className={`${styles.videoDetails__title} mat-h2`}>
+            {videoResult?.snippet?.title}
+          </div>
 
-                            </Button>
+          <div className={styles.videoDetails__footer}>
+            <div className={`${styles.videoDetails__footer__views} mat-h3`}>
+              <span> {videoResult?.statistics?.viewCount} views </span>
+              <span> • {videoResult?.snippet?.publishedAt?.toString()} </span>
+            </div>
 
-                            <Button sx={buttonStyles} className={styles.videoDetailsActions__item} onClick={onToggleDisLike}>
-                                {isDisliked() && <ThumbDown className={styles.videoDetailsActions__item__icon} />}
-                                {!isDisliked() && <ThumbDownOffAltIcon className={styles.videoDetailsActions__item__icon} />}
+            <div className={styles.videoDetailsActions}>
+              <Button
+                sx={buttonStyles}
+                className={styles.videoDetailsActions__item}
+                onClick={onToggleLike}
+              >
+                {isLiked() && (
+                  <ThumbUpIcon
+                    className={styles.videoDetailsActions__item__icon}
+                  />
+                )}
+                {!isLiked() && (
+                  <ThumbUpOffAltIcon
+                    className={styles.videoDetailsActions__item__icon}
+                  />
+                )}
 
-                                <p
-                                    className={`${styles.videoDetailsActions__item__text} mat-h3`}
-                                >
-                                    DISLIKE
-                                </p>
+                <p
+                  className={`${styles.videoDetailsActions__item__text} mat-h3`}
+                >
+                  {ytdAbbreviateNumber(
+                    Number(videoResult?.statistics?.likeCount),
+                    0
+                  )}{" "}
+                  LIKES
+                </p>
+              </Button>
 
-                            </Button>
+              <Button
+                sx={buttonStyles}
+                className={styles.videoDetailsActions__item}
+                onClick={onToggleDisLike}
+              >
+                {isDisliked() && (
+                  <ThumbDown
+                    className={styles.videoDetailsActions__item__icon}
+                  />
+                )}
+                {!isDisliked() && (
+                  <ThumbDownOffAltIcon
+                    className={styles.videoDetailsActions__item__icon}
+                  />
+                )}
 
-                            <Button sx={buttonStyles} className={styles.videoDetailsActions__item} onClick={() => setIsShareDialogOpen(true)}>
-                                {<Share className={styles.videoDetailsActions__item__icon} />}
+                <p
+                  className={`${styles.videoDetailsActions__item__text} mat-h3`}
+                >
+                  DISLIKE
+                </p>
+              </Button>
 
-                                <p className={`${styles.videoDetailsActions__item__text} mat-h3`}
-                                >
-                                    SHARE
-                                </p>
+              <Button
+                sx={buttonStyles}
+                className={styles.videoDetailsActions__item}
+                onClick={() => setIsShareDialogOpen(true)}
+              >
+                {<Share className={styles.videoDetailsActions__item__icon} />}
 
-                            </Button>
+                <p
+                  className={`${styles.videoDetailsActions__item__text} mat-h3`}
+                >
+                  SHARE
+                </p>
+              </Button>
 
-                            <ShareVideoDialog
-                                open={isShareDialogOpen}
-                                handleClose={() => setIsShareDialogOpen(false)}
-                                currenVideoTime={0}
-                                videoUrl={videoUrl}
-                            />
+              <ShareVideoDialog
+                open={isShareDialogOpen}
+                handleClose={() => setIsShareDialogOpen(false)}
+                currenVideoTime={0}
+                videoUrl={videoUrl}
+              />
 
-                            <Button sx={buttonStyles}  className={styles.videoDetailsActions__item} onClick={onMiniPLayerMode}>
-                                {<PictureInPictureAlt className={`${styles.videoDetailsActions__item__icon} flash`} />}
-
-                                <p className={`${styles.videoDetailsActions__item__text} mat-h3`}
-                                >
-                                    MINI PLAYER
-                                </p>
-
-                            </Button>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <Divider />
-
+              <Button
+                sx={buttonStyles}
+                className={styles.videoDetailsActions__item}
+                onClick={onMiniPLayerMode}
+              >
                 {
-                    videoResult?.snippet?.description ?
-                        <div className={styles.videoCard__secondaryInfo}>
-                            <VideoCardSecondaryInfo videoItem={videoResult} />
-                        </div> : null
+                  <PictureInPictureAlt
+                    className={`${styles.videoDetailsActions__item__icon} flash`}
+                  />
                 }
 
+                <p
+                  className={`${styles.videoDetailsActions__item__text} mat-h3`}
+                >
+                  MINI PLAYER
+                </p>
+              </Button>
             </div>
-        </Fragment>
-    );
+          </div>
+        </div>
+
+        <Divider />
+
+        {videoResult?.snippet?.description ? (
+          <div className={styles.videoCard__secondaryInfo}>
+            <VideoCardSecondaryInfo videoItem={videoResult} />
+          </div>
+        ) : null}
+      </div>
+    </Fragment>
+  );
 }
