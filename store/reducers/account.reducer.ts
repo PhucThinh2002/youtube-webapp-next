@@ -62,15 +62,22 @@ export const accountSlice = createSlice({
             };
         },
         addVideoToHistoryList(state, action) {
-            const videoId = action.payload.videoId;
-            const watchedList = new Set([...state.watchedVideos]);
-            watchedList.add(videoId);
+  if (!state.isWatchHistoryEnabled) {
+    return state;
+  }
+  
+  const videoId = action.payload.videoId;
+  if (!videoId) return state;
 
-            return {
-                ...state,
-                watchedVideos: Array.from(watchedList),
-            };
-        },
+  // Sử dụng Set để tránh trùng lặp
+  const watchedList = new Set([...state.watchedVideos]);
+  watchedList.add(videoId);
+
+  return {
+    ...state,
+    watchedVideos: Array.from(watchedList),
+  };
+},
         clearWatchHistory(state) {
             return {
                 ...state,
@@ -80,7 +87,7 @@ export const accountSlice = createSlice({
         toggleIsWatchHistoryEnabled(state, action) {
             return {
                 ...state,
-                isWatchHistoryEnabled: action.payload,
+                isWatchHistoryEnabled: !state.isWatchHistoryEnabled,
             };
         }
     }

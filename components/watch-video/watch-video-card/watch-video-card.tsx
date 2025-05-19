@@ -16,12 +16,14 @@ import ShareVideoDialog from "./share-video-dialog/share-video-dialog";
 import { setIsMiniPlayerMode, setMiniPlayerVideo } from "@/store/reducers/video.reducer";
 import { useRouter } from "next/router";
 import { useVideoList } from "@/lib/ui/hooks/useVideoList";
+import { ytdTimeAgo } from "@/lib/ui/pipes/time-ago/time-ago.pipe";
 
 interface Props {
   videoId: string | undefined;
   startSeconds?: number | undefined;
   videoResult: IYoutubeVideoItem | undefined;
 }
+
 export default function WatchVideoCard(props: Props) {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -35,7 +37,7 @@ export default function WatchVideoCard(props: Props) {
   const { fetchVideoItems, videoItems, isVideoItemsLoading, videoItemsError } =
     useVideoList();
   const likedVideos = useAppSelector(selectLikedVideos);
-  const dislikedVideos = useAppSelector(selectDislikedVideos);
+  const dislikedVideos = useAppSelector(selectDislikedVideos);  
   const buttonStyles = {
     color: "var(--yt-spec-text-primary)",
   };
@@ -80,13 +82,25 @@ export default function WatchVideoCard(props: Props) {
     dispatch(toggleDislikeVideo({ videoId }));
   };
 
-  const onMiniPLayerMode = (): void => {
-    dispatch(setMiniPlayerVideo({ videoId: videoId, startSeconds: 0 }));
+  const onMiniPlayerMode = (): void => {
+    if (!videoId) return;
+    
+    // Get current video player dimensions
+    const videoPlayer = document.querySelector(`.${styles.videoCard__player}`);
+    const rect = videoPlayer?.getBoundingClientRect();
+    
+    dispatch(setMiniPlayerVideo({ 
+      videoId,
+      startSeconds: 0,
+      width: rect?.width || 360,
+      height: rect?.height || 202,
+      position: { 
+        x: window.innerWidth - (rect?.width || 360) - 20,
+        y: 20
+      }
+    }));
+    
     dispatch(setIsMiniPlayerMode(true));
-
-    router.push({
-      pathname: "/",
-    });
   };
 
   if (isVideoItemsLoading) {
@@ -146,8 +160,8 @@ export default function WatchVideoCard(props: Props) {
 
           <div className={styles.videoDetails__footer}>
             <div className={`${styles.videoDetails__footer__views} mat-h3`}>
-              <span> {videoResult?.statistics?.viewCount} views </span>
-              <span> • {videoResult?.snippet?.publishedAt?.toString()} </span>
+              <span> {ytdAbbreviateNumber(Number(videoResult?.statistics?.viewCount))} views </span>
+              <span> • {ytdTimeAgo(videoResult?.snippet?.publishedAt)} </span>
             </div>
 
             <div className={styles.videoDetailsActions}>
@@ -225,7 +239,7 @@ export default function WatchVideoCard(props: Props) {
               <Button
                 sx={buttonStyles}
                 className={styles.videoDetailsActions__item}
-                onClick={onMiniPLayerMode}
+                onClick={onMiniPlayerMode}
               >
                 {
                   <PictureInPictureAlt

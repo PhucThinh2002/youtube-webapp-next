@@ -13,11 +13,13 @@ export default function WatchVideo() {
     const startSeconds = Number(query.t);
 
     const { fetchVideoItems, videoItems } = useVideoList();
-    const videoInfo = videoItems?.[0].items?.find((result: IYoutubeVideoItem) => result.id === videoId);
-
+    // Sửa cách lấy videoInfo
+    const videoInfo = videoItems?.find((result: IYoutubeVideoItem) => result.id === videoId);
 
     useEffect(() => {
-        fetchVideoItems({ id: videoId});
+        if (videoId) {
+            fetchVideoItems({ id: videoId });
+        }
     }, [videoId, fetchVideoItems]);
 
     return (
@@ -25,10 +27,21 @@ export default function WatchVideo() {
             <div className={styles.host}>
                 <div className={styles.watchVideo}>
                     <div className={styles.videoCardWrapper}>
-                        <WatchVideoCard videoId={videoId} startSeconds={startSeconds} videoResult={videoInfo} />
+                        <WatchVideoCard 
+                            videoId={videoId} 
+                            startSeconds={startSeconds} 
+                            videoResult={videoInfo} 
+                        />
                     </div>
                     <div className={styles.relatedVideosWrapper}>
-                        <RelatedVideos query={videoInfo?.snippet?.channelTitle} />
+                        {/* Thêm fallback khi chưa có videoInfo */}
+                        {videoInfo ? (
+                            <RelatedVideos 
+                                query={videoInfo.snippet?.title || videoInfo.snippet?.channelTitle} 
+                            />
+                        ) : (
+                            <div>Loading related videos...</div>
+                        )}
                     </div>
                 </div>
             </div>

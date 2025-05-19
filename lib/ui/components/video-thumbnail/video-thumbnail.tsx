@@ -8,6 +8,7 @@ import classNames from "classnames";
 import Image from "next/image";
 import { useAppDispatch } from "@/store/hooks";
 import { addVideoToHistoryList } from "@/store/reducers/account.reducer";
+import { useRouter } from "next/router";
 
 interface Props {
   searchItem?: IYoutubeSearchItem;
@@ -15,6 +16,7 @@ interface Props {
   direction?: "vertical" | "horizontal";
   isNowPlaying?: boolean;
   priority?: boolean;
+  disableHistoryAdd?: boolean;
 }
 
 export default function VideoThumbnail(props: Props) {
@@ -33,12 +35,30 @@ export default function VideoThumbnail(props: Props) {
   const duration = props.videoDetail?.contentDetails?.duration;
 
   const dispatch = useAppDispatch();
+  const router = useRouter(); 
+  
+  
+  const handleClick = (e: React.MouseEvent) => {
+  e.preventDefault();
+  
+  // Lấy videoId từ searchItem hoặc videoDetail
+  const videoId = 
+    props.searchItem?.id?.videoId || // Cho YouTube Search API
+    props.searchItem?.id ||          // Nếu id là string trực tiếp
+    props.videoDetail?.id;           // Cho YouTube Video API
 
-  const handleClick = () => {
-    if (props.searchItem?.id?.videoId) {
-      dispatch(addVideoToHistoryList({ videoId: props.searchItem.id.videoId }));
-    }
-  };
+  if (!videoId) {
+    console.error('No video ID found in:', props.searchItem, props.videoDetail);
+    return;
+  }
+
+  if (!props.disableHistoryAdd) {
+    dispatch(addVideoToHistoryList({ videoId }));
+  }
+
+  router.push(`/watch?v=${videoId}`)
+    .catch(err => console.error('Navigation error:', err));
+};
 
   const handleImageError = () => {
     setImageError(true);

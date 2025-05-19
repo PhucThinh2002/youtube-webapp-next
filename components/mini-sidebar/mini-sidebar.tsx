@@ -25,7 +25,7 @@ export default function MiniSidebar(props: Props) {
                             </div>
                         </Link>
                     );
-                })};
+                })}
 
             </div>
         </Fragment>

@@ -1,11 +1,4 @@
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState,} from "react";
 import styles from "./browse-videos.module.scss";
 import MiniSidebar from "../mini-sidebar/mini-sidebar";
 import { IYoutubeVideoItem } from "@/lib/ui/models/youtube-video-list.model";
@@ -26,19 +19,11 @@ export default function BrowserVideos() {
   const [lastSearchQuery, setLastSearchQuery] = useState<string>("");
   const searchCache = useRef<Map<string, IYoutubeSearchItem[]>>(new Map());
   const searchQuery = useAppSelector(selectSearchQuery);
-  const [localSearchItems, setLocalSearchItems] = useState<
-    IYoutubeSearchItem[] | null
-  >(null);
+  const [localSearchItems, setLocalSearchItems] = useState<IYoutubeSearchItem[] | null>(null);
 
-  const {
-    fetchSeachItems,
-    searchItems,
-    isSearchItemsLoading,
-    searchItemsError,
-  } = useSearchList();
+  const { fetchSeachItems, searchItems, isSearchItemsLoading, searchItemsError } = useSearchList();
 
-  const { fetchVideoItems, videoItems, isVideoItemsLoading, videoItemsError } =
-    useVideoList();
+  const { fetchVideoItems, videoItems, isVideoItemsLoading, videoItemsError } = useVideoList();
 
   // Sử dụng useRef cho debounce function để tránh recreate mỗi lần render
   const debouncedSearchRef = useRef(
@@ -116,7 +101,7 @@ export default function BrowserVideos() {
     return <BrowserVideosLoader />;
   }
 
-  // Hiển thị khi không có kết quả
+  // Hiển thị khi không có kết quả 
   if (!searchItems?.length) {
     return <BrowseVideosEmpty />;
   }

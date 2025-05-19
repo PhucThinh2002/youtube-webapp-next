@@ -5,6 +5,8 @@ import VideoThumbnail from "@/lib/ui/components/video-thumbnail/video-thumbnail"
 import VideoThumbnailLoader from "@/lib/ui/components/video-thumbnail-loader/video-thumbnail-loader";
 import Link from "next/link";
 import { IYoutubeSearchItem } from "@/lib/ui/models/youtube-search-list.model";
+import { ytdAbbreviateNumber } from "@/lib/ui/pipes/abbreviate-number/abbreviate-number.pipe";
+import { ytdTimeAgo } from "@/lib/ui/pipes/time-ago/time-ago.pipe";
 
 interface Props {
   query?: string;
@@ -13,34 +15,43 @@ interface Props {
 export default function RelatedVideos(props: Props) {
   const loaderItems = new Array(5).fill("item");
   const [lastQuery, setLastQuery] = useState<string | null>(null);
-  const [localSearchItems, setLocalSearchItems] = useState<
-    IYoutubeSearchItem[]
-  >([]); // Thêm state local
-
+  const [localSearchItems, setLocalSearchItems] = useState<IYoutubeSearchItem[]>([]); 
   const { query } = props;
-  const { fetchSeachItems, isSearchItemsLoading, searchItemsError } =
-    useSearchList();
+  const { fetchSeachItems, isSearchItemsLoading, searchItemsError } = useSearchList();
 
   const cachedResults = useRef<Map<string, IYoutubeSearchItem[]>>(new Map());
 
   useEffect(() => {
-    // Thêm kiểm tra undefined
-    if (!props.query || props.query === lastQuery) return;
+        if (!query) return;
 
-    // TypeScript sẽ biết props.query là string tại đây
-    const currentQuery = props.query;
+        // Thêm 2 cách tìm kiếm: theo title và channelTitle
+        const searchQueries = [
+            query,
+            `related to ${query}`
+        ];
 
-    if (cachedResults.current.has(currentQuery)) {
-      setLocalSearchItems(cachedResults.current.get(currentQuery)!);
-      return;
-    }
+        const fetchAll = async () => {
+            try {
+                const results = await Promise.all(
+                    searchQueries.map(q => 
+                        cachedResults.current.has(q) 
+                            ? cachedResults.current.get(q)!
+                            : fetchSeachItems({ query: q, maxResults: 3 })
+                    )
+                );
+                
+                const merged = results.flat().filter((v, i, a) => 
+                    a.findIndex(t => t.id?.videoId === v.id?.videoId) === i
+                );
+                
+                setLocalSearchItems(merged.slice(0, 5));
+            } catch (error) {
+                console.error("Failed to fetch related videos:", error);
+            }
+        };
 
-    setLastQuery(currentQuery);
-    fetchSeachItems({ query: currentQuery, maxResults: 5 }).then((items) => {
-      cachedResults.current.set(currentQuery, items); // Đã đảm bảo currentQuery là string
-      setLocalSearchItems(items);
-    });
-  }, [props.query, lastQuery, fetchSeachItems]);
+        fetchAll();
+    }, [query, fetchSeachItems]);
 
   if (isSearchItemsLoading) {
     return (
@@ -82,6 +93,23 @@ export default function RelatedVideos(props: Props) {
                   <div className={styles.videoItem__thumbnail}>
                     <VideoThumbnail searchItem={video} direction="vertical" />
                   </div>
+                  <div className={styles.videoInfo}>
+                  <h3 className={styles.videoTitle} title={video.snippet?.title}>
+                    {video.snippet?.title}
+                  </h3>
+                  <p className={styles.videoChannel}>
+                    {video.snippet?.channelTitle}
+                  </p>
+                  <div className={styles.videoMetadata}>
+                    <span>
+                      {ytdAbbreviateNumber(Number(video.statistics?.viewCount || 0))} views
+                    </span>
+                    <span>•</span>
+                    <span>
+                      {ytdTimeAgo(video.snippet?.publishedAt)}
+                    </span>
+                  </div>
+                </div>
                 </div>
               </Link>
             );

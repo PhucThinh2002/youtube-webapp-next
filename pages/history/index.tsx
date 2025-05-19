@@ -119,9 +119,11 @@ export default function HistoryPage() {
               return (
                 <div className={styles.videoItem} key={videoIndex}>
                   <div className={styles.videoItem__thumbnail}>
-                    <Link href={`/watch?v=${video.id?.videoId}`}>
-                      <VideoThumbnail searchItem={video} direction="vertical" />
-                    </Link>
+                    <VideoThumbnail 
+        searchItem={video} 
+        direction="vertical"
+        disableHistoryAdd={true} // Ngăn thêm trùng vào history
+      />
                   </div>
                 </div>
               );

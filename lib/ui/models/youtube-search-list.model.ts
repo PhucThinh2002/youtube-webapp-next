@@ -10,6 +10,7 @@ export interface IYoutubeSearchResult {
 }
 
 export interface IYoutubeSearchItem {
+  statistics: any;
   kind?: string | null;
   etag?: string | null;
   id?: IYoutubeSearchId;

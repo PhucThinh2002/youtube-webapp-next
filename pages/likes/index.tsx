@@ -72,21 +72,23 @@ export default function Likes() {
   };
 
   const emptyTemplate = () => {
-    return (
-      <Fragment>
-        <div className={styles.emptyTemplate}>
-          <div className={styles.emptyTemplate__header}>
-            <Search className={styles.emptyTemplateIcon} />
-          </div>
-
-          <div className={styles.emptyTemplate__text}>
-            <h2 className="mat-h2">Seems like you have not liked videos yet</h2>
-            <a className="mat-h3"> Watch and like some videos </a>
-          </div>
+  return (
+    <Fragment>
+      <div className={styles.emptyTemplate}>
+        <div className={styles.emptyTemplate__header}>
+          <Search className={styles.emptyTemplateIcon} />
         </div>
-      </Fragment>
-    );
-  };
+
+        <div className={styles.emptyTemplate__text}>
+          <h2 className="mat-h2">Seems like you have not liked videos yet</h2>
+          <Link href="/" className="mat-h3" style={{ textDecoration: 'underline', cursor: 'pointer' }}>
+            Watch and like some videos
+          </Link>
+        </div>
+      </div>
+    </Fragment>
+  );
+};
 
   if (!videoIds?.length) {
     return emptyTemplate();

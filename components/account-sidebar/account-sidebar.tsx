@@ -87,7 +87,7 @@ export default function AccountSidebar() {
             }}
           >
             <MenuItem onClick={() => handleAppearanceMenuClose(AppTheme.LIGHT)}>
-              Light Theme
+                    Light Theme
             </MenuItem>
             <MenuItem onClick={() => handleAppearanceMenuClose(AppTheme.DARK)}>
               Dark Theme
@@ -108,7 +108,7 @@ export default function AccountSidebar() {
             </a>
           </Button>
 
-          {/* <Button className={styles.sidebarContentItem} disabled={true}>
+          <Button className={styles.sidebarContentItem} disabled={true}>
             <div className={styles.sidebarContentItem__icon}>
               <Keyboard />
             </div>
@@ -124,16 +124,7 @@ export default function AccountSidebar() {
             <div className={`mat-h3 ${styles.sidebarContentItem__text}`}>
               Change Youtube API Service
             </div>
-          </Button> */}
-
-          {/* <Link href={'/policy-terms'}>
-                        <Button className={styles.sidebarContentItem}>
-                            <div className={styles.sidebarContentItem__icon}>
-                                <Policy />
-                            </div>
-                            <div className={`mat-h3 ${styles.sidebarContentItem__text}`}>Policy & Terms</div>
-                        </Button>
-                    </Link> */}
+          </Button>
 
           <Button className={styles.sidebarContentItem}>
             <div className={styles.sidebarContentItem__icon}>
@@ -141,6 +132,7 @@ export default function AccountSidebar() {
             </div>
 
             <a
+              href="https://support.google.com/youtube/answer/2976814?hl=en"
               target="_blank"
               className={`mat-h3 ${styles.sidebarContentItem__text}`}
             >

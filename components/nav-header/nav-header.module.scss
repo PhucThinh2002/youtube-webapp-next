@@ -84,3 +84,51 @@
     }
   }
 }
+// Responsive cho tablet và desktop
+@media (min-width: 600px) {
+  .host {
+    padding: 0 16px;
+  }
+
+  .headerBrandIcon {
+    .brandIcon {
+      width: 97px; // Kích thước gốc trên tablet/desktop
+    }
+    
+    &__countryCode {
+      font-size: 0.8rem;
+      right: -10px;
+    }
+  }
+
+  .headerFeature {
+    width: var(--yt-header-feature-icon-width);
+    height: var(--yt-header-feature-icon-height);
+    margin-left: 0.8rem;
+    
+    button {
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .header {
+    &__start {
+      min-width: 180px;
+    }
+    
+    &__end {
+      min-width: 160px;
+    }
+  }
+  
+  .headerFeature {
+    &--community {
+      display: flex;
+    }
+  }
+}

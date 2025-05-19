@@ -34,10 +34,17 @@ export default function Playground() {
     }, [fetchData]); // fetchData is memoized and only changes if param changes
 
 
+    // const onClickHandler = () => {
+    //     console.log('clickHandler');
+    //     setCount(count + 1);
+    //     setParam(count.toString());
+    // };
     const onClickHandler = () => {
-        console.log('clickHandler');
-        setCount(count + 1);
-        setParam(count.toString());
+        setCount(prev => {
+            const newCount = prev + 1;
+            setParam(newCount.toString());
+            return newCount;
+        });
     };
 
     return (

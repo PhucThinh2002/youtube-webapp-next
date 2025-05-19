@@ -99,6 +99,7 @@
       }
 
       .MuiInputBase-input {
+        font-family: Roboto, Arial, sans-serif; 
         font-size: 14px;
         padding: 0 !important;
         height: 100%;
@@ -110,6 +111,20 @@
         }
       }
     }
+  }
+}
+
+/* Override font cho search input */
+.search-field .MuiInputBase-input {
+  font-family: Roboto, Arial, sans-serif !important;
+  font-size: 1.4rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 480px) {
+  .search-field .MuiInputBase-input {
+    font-size: 1.6rem !important;
   }
 }
 
@@ -282,6 +297,7 @@
 /* Thêm vào file SCSS */
 
 .searchboxField {
+   font-family: inherit;
   .MuiAutocomplete-root {
     height: 100%;
     font-size: 1.4rem; /* Kích thước font gốc */
